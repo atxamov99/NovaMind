@@ -1,5 +1,5 @@
-// Base URL for our new Express backend
-const API_BASE_URL = 'http://localhost:5000/api';
+// Base URL dynamically loaded from .env (for Vercel deployment)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');
