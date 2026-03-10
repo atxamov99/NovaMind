@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1773167865167",
+    "userId": "1773167829190",
+    "title": "Toshkent haqida qisqacha ma'lu...",
+    "messages": [
+      {
+        "role": "user",
+        "text": "Toshkent haqida qisqacha ma'lumot ber"
+      },
+      {
+        "role": "model",
+        "text": "Toshkent – O‘zbekiston Respublikasining poytaxti va eng yirik shahri.\n\nMana Toshkent haqida qisqacha ma'lumot:\n\n*   **Poytaxt va Yirik Markaz:** O‘zbekistonning siyosiy, iqtisodiy, ilmiy va madaniy markazi. Markaziy Osiyodagi eng yirik shaharlardan biri.\n*   **Tarixi:** Uning tarixi 2200 yildan oshiq bo‘lib, qadimiy Ipak yo‘li chorrahasida joylashgan. Bu uni mintaqadagi eng qadimiy shaharlardan biriga aylantiradi.\n*   **Zamonaviylik va An'analar:** Toshkent bugungi kunda zamonaviy me'morchilik va infratuzilmani sharqona an'analar, yashil xiyobonlar va qadimiy obidalar bilan uyg'unlashtirgan yirik metropoliya hisoblanadi.\n*   **Diqqatga Sazovor Joylar:** Shahar o‘zining keng va yashil bog‘lari, muzeylari, teatrlari, zamonaviy osmono‘par binolari va betakror Toshkent metropoliteni stansiyalari bilan mashhur. Hazrati Imom majmuasi kabi tarixiy obidalar ham mavjud.\n*   **Madaniyat va Mehmondo‘stlik:** Toshkentliklar o‘zlarining mehmondo‘stligi va ochiqko‘ngilligi bilan tanilgan. Shaharda turli millat va madaniyat vakillari yashaydi.\n*   **Iqlim:** Iqlimi keskin kontinental bo'lib, yozlari issiq va qishlari sovuq kechadi.\n\nUmuman olganda, Toshkent – o‘zining boy tarixi, madaniyati va jadal rivojlanishi bilan har qanday mehmonni lol qoldira oladigan, doimo o‘zgarib va yangilanib borayotgan dinamik shahar."
+      }
+    ],
+    "updatedAt": 1773167866123
+  },
+  {
+    "id": "1773167889647",
+    "userId": "1773167829190",
+    "title": "Salom Gemini!",
+    "messages": [
+      {
+        "role": "user",
+        "text": "Salom Gemini!"
+      },
+      {
+        "role": "model",
+        "text": "Salom! How can I help you today?"
+      }
+    ],
+    "updatedAt": 1773167941710
+  },
+  {
+    "id": "1773168327657",
+    "userId": "1773168299314",
+    "title": "salom",
+    "messages": [
+      {
+        "role": "user",
+        "text": "salom"
+      },
+      {
+        "role": "model",
+        "text": "Salom! Qalaysiz?"
+      },
+      {
+        "role": "user",
+        "text": "qandaysan"
+      },
+      {
+        "role": "model",
+        "text": "Yaxshiman, rahmat! O'zingiz qalaysiz?"
+      }
+    ],
+    "updatedAt": 1773168335925
+  }
+]

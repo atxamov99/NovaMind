@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1773167829190",
+    "name": "Test User",
+    "email": "test@test.com",
+    "passwordHash": "$2b$10$kn6UlHOTY9Sn2yATeHDs7OBFNvwjlcm4Y3w8i2HhxtBtssehfFfLS"
+  },
+  {
+    "id": "1773168299314",
+    "name": "Abdalaziz",
+    "email": "abdulazizatxamov262@gmail.com",
+    "passwordHash": "$2b$10$aN.BoZRX0F3LPSVl3bfmjurOVrrLgq86L5oHzN0aXQxn6hwy0ATE6"
+  }
+]

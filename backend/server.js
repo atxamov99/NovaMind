@@ -1,0 +1,208 @@
+const express = require('express');
+require('dotenv').config();  // .env faylni o‘qish
+
+console.log(process.env.API_KEY);  // test uchun
+console.log(process.env.MODEL);    // test uchun
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const app = express();
+const PORT = 5000;
+const JWT_SECRET = 'super_secret_jwt_key_123';
+
+// Middleware
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+}));
+app.use(express.json());
+
+// Load API Key
+const API_KEY = process.env.API_KEY;
+const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: process.env.MODEL });
+
+// Database paths
+const usersDBPath = path.join(__dirname, 'users.json');
+const chatsDBPath = path.join(__dirname, 'chats.json');
+
+// File I/O Helpers
+const readJSON = (filePath) => {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    return [];
+  }
+};
+const writeJSON = (filePath, data) => {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+};
+
+// Auth Middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
+  
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token.' });
+    req.user = user;
+    next();
+  });
+};
+
+/* ================== AUTH ROUTES ================== */
+
+// POST /api/auth/register
+app.post('/api/auth/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) return res.status(400).json({ error: 'All fields are required' });
+
+  const users = readJSON(usersDBPath);
+  if (users.find(u => u.email === email)) {
+    return res.status(400).json({ error: 'Email already exists' });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const passwordHash = await bcrypt.hash(password, salt);
+
+  const newUser = {
+    id: Date.now().toString(),
+    name,
+    email,
+    passwordHash
+  };
+  
+  users.push(newUser);
+  writeJSON(usersDBPath, users);
+
+  const token = jwt.sign({ id: newUser.id, name: newUser.name, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token, user: { id: newUser.id, name: newUser.name, email: newUser.email } });
+});
+
+// POST /api/auth/login
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+
+  const users = readJSON(usersDBPath);
+  const user = users.find(u => u.email === email);
+  if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+
+  const validPassword = await bcrypt.compare(password, user.passwordHash);
+  if (!validPassword) return res.status(400).json({ error: 'Invalid credentials' });
+
+  const token = jwt.sign({ id: user.id, name: user.name, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+});
+
+/* ================== CHAT ROUTES ================== */
+
+// GET /api/chats (Get all user's chats)
+app.get('/api/chats', authenticateToken, (req, res) => {
+  const allChats = readJSON(chatsDBPath);
+  const userChats = allChats.filter(c => c.userId === req.user.id).sort((a, b) => b.updatedAt - a.updatedAt);
+  // Return just metadata, not full messages list to save bandwidth on sidebar load
+  const chatMeta = userChats.map(c => ({ id: c.id, title: c.title, updatedAt: c.updatedAt }));
+  res.json(chatMeta);
+});
+
+// GET /api/chats/:id (Get specific chat full info)
+app.get('/api/chats/:id', authenticateToken, (req, res) => {
+  const allChats = readJSON(chatsDBPath);
+  const chat = allChats.find(c => c.id === req.params.id && c.userId === req.user.id);
+  if (!chat) return res.status(404).json({ error: 'Chat not found' });
+  res.json(chat);
+});
+
+// POST /api/chats (Create new empty chat)
+app.post('/api/chats', authenticateToken, (req, res) => {
+  const allChats = readJSON(chatsDBPath);
+  const newChat = {
+    id: Date.now().toString(),
+    userId: req.user.id,
+    title: 'New Chat',
+    messages: [],
+    updatedAt: Date.now()
+  };
+  allChats.push(newChat);
+  writeJSON(chatsDBPath, allChats);
+  res.json(newChat);
+});
+
+// DELETE /api/chats/:id (Delete chat)
+app.delete('/api/chats/:id', authenticateToken, (req, res) => {
+  let allChats = readJSON(chatsDBPath);
+  const chatIndex = allChats.findIndex(c => c.id === req.params.id && c.userId === req.user.id);
+  if (chatIndex === -1) return res.status(404).json({ error: 'Chat not found' });
+  
+  allChats.splice(chatIndex, 1);
+  writeJSON(chatsDBPath, allChats);
+  res.json({ message: 'Chat deleted correctly' });
+});
+
+// POST /api/chats/:id/messages (Send message to chat)
+app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message is required' });
+
+    const allChats = readJSON(chatsDBPath);
+    const chatIndex = allChats.findIndex(c => c.id === req.params.id && c.userId === req.user.id);
+    if (chatIndex === -1) return res.status(404).json({ error: 'Chat not found' });
+
+    const chat = allChats[chatIndex];
+    chat.updatedAt = Date.now();
+    
+    // Auto-generate title based on first message if it's still 'New Chat'
+    if (chat.messages.length === 0 && chat.title === 'New Chat') {
+      chat.title = message.length > 30 ? message.substring(0, 30) + '...' : message;
+    }
+
+    // Add user message to DB
+    const userMsg = { role: 'user', text: message };
+    chat.messages.push(userMsg);
+    
+    // Format history for Gemini API
+    const formattedHistory = chat.messages.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }],
+    }));
+
+    const previousHistory = formattedHistory.slice(0, -1);
+    
+    const geminiChat = model.startChat({
+      history: previousHistory,
+      generationConfig: { maxOutputTokens: 2048, temperature: 0.7 },
+    });
+
+    // Save DB immediately for user message
+    writeJSON(chatsDBPath, allChats);
+
+    // Get response from Gemini
+    const result = await geminiChat.sendMessage(message);
+    const responseText = await result.response.text();
+
+    // Add AI response to DB
+    const modelMsg = { role: 'model', text: responseText };
+    chat.messages.push(modelMsg);
+    
+    writeJSON(chatsDBPath, allChats);
+
+    res.json({ userMessage: userMsg, modelMessage: modelMsg, title: chat.title });
+
+  } catch (error) {
+    console.error("Error generating response:", error);
+    res.status(500).json({ error: 'Failed to get response from AI.' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Backend server running on http://localhost:${PORT}`);
+});
