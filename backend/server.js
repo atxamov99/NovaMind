@@ -1,12 +1,10 @@
 const express = require('express');
 require('dotenv').config();  // .env faylni o‘qish
 
-console.log(process.env.API_KEY);  // test uchun
-console.log(process.env.MODEL);    // test uchun
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const OpenAI = require('openai');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -22,9 +20,7 @@ app.use(cors({
 app.use(express.json());
 
 // Load API Key
-const API_KEY = process.env.API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: process.env.MODEL });
+const openai = new OpenAI({ apiKey: process.env.API_KEY });
 
 // Database paths - process.env.VERCEL is set automatically by Vercel
 const isVercel = process.env.VERCEL === '1';
@@ -174,26 +170,25 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
     // Add user message to DB
     const userMsg = { role: 'user', text: message };
     chat.messages.push(userMsg);
-    
-    // Format history for Gemini API
-    const formattedHistory = chat.messages.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.text }],
-    }));
-
-    const previousHistory = formattedHistory.slice(0, -1);
-    
-    const geminiChat = model.startChat({
-      history: previousHistory,
-      generationConfig: { maxOutputTokens: 2048, temperature: 0.7 },
-    });
 
     // Save DB immediately for user message
     writeJSON(chatsDBPath, allChats);
 
-    // Get response from Gemini
-    const result = await geminiChat.sendMessage(message);
-    const responseText = await result.response.text();
+    // Format history for OpenAI API
+    const formattedMessages = chat.messages.map(msg => ({
+      role: msg.role === 'model' ? 'assistant' : 'user',
+      content: msg.text,
+    }));
+
+    // Get response from OpenAI
+    const completion = await openai.chat.completions.create({
+      model: process.env.MODEL || 'gpt-4o-mini',
+      messages: formattedMessages,
+      max_tokens: 2048,
+      temperature: 0.7,
+    });
+
+    const responseText = completion.choices[0].message.content;
 
     // Add AI response to DB
     const modelMsg = { role: 'model', text: responseText };
