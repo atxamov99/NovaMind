@@ -26,13 +26,15 @@ const API_KEY = process.env.API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: process.env.MODEL });
 
-// Database paths
-const usersDBPath = path.join(__dirname, 'users.json');
-const chatsDBPath = path.join(__dirname, 'chats.json');
+// Database paths - process.env.VERCEL is set automatically by Vercel
+const isVercel = process.env.VERCEL === '1';
+const usersDBPath = isVercel ? path.join('/tmp', 'users.json') : path.join(__dirname, 'users.json');
+const chatsDBPath = isVercel ? path.join('/tmp', 'chats.json') : path.join(__dirname, 'chats.json');
 
 // File I/O Helpers
 const readJSON = (filePath) => {
   try {
+    if (!fs.existsSync(filePath)) return [];
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);
   } catch (err) {
@@ -40,7 +42,11 @@ const readJSON = (filePath) => {
   }
 };
 const writeJSON = (filePath, data) => {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("Failed to write to DB:", err);
+  }
 };
 
 // Auth Middleware
@@ -206,3 +212,6 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
 });
+
+// Export app for Vercel serverless deployment
+module.exports = app;

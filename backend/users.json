@@ -10,5 +10,11 @@
     "name": "Abdalaziz",
     "email": "abdulazizatxamov262@gmail.com",
     "passwordHash": "$2b$10$aN.BoZRX0F3LPSVl3bfmjurOVrrLgq86L5oHzN0aXQxn6hwy0ATE6"
+  },
+  {
+    "id": "1773191323517",
+    "name": "1",
+    "email": "1@gmail.com",
+    "passwordHash": "$2b$10$ujuO5kyeArRnYOepl0S41O8LQzxI6fHFn3xz3pH1gPTjG9qx0A47W"
   }
 ]
