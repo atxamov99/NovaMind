@@ -25,6 +25,7 @@ const ChatInterface = () => {
   const { user } = useSelector(state => state.auth);
   const dispatch = useDispatch();
   const messagesEndRef = useRef(null);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -60,9 +61,18 @@ const ChatInterface = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-dark-bg overflow-hidden text-gray-900 dark:text-gray-100 transition-colors">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex-1 flex flex-col h-full relative">
-        <Header />
+        <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="flex-1 overflow-y-auto w-full relative">
           <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col min-h-full">
             {messages.length === 0 && (

@@ -1,11 +1,14 @@
 import React from 'react';
 import { Menu, User, Sparkles } from 'lucide-react';
 
-const Header = () => {
+const Header = ({ onMenuClick }) => {
   return (
     <header className="h-16 border-b border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg flex items-center justify-between px-4 sticky top-0 z-10 transition-colors">
       <div className="flex items-center gap-3">
-        <button className="md:hidden p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-border transition-colors">
+        <button 
+          onClick={onMenuClick}
+          className="md:hidden p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-border transition-colors"
+        >
           <Menu size={20} />
         </button>
         <div className="flex items-center gap-2">

@@ -45,7 +45,7 @@ const Register = () => {
             <Sparkles className="text-white w-8 h-8" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Ro'yxatdan o'tish</h1>
-          <p className="text-gray-500 dark:text-gray-400">Gemini AI'dan bepul foydalanish uchun hisob yarating</p>
+          <p className="text-gray-500 dark:text-gray-400">NovaMind AI'dan bepul foydalanish uchun hisob yarating</p>
         </div>
 
         <div className="bg-white dark:bg-dark-panel p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-dark-border">

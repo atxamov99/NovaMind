@@ -15,7 +15,7 @@ import { MessageSquarePlus, Trash2, Settings, MessageSquare, LogOut, Menu } from
 import { getAllChats, getChatHistory, createNewChat, deleteChat } from '../services/api';
 import SettingsModal from './SettingsModal';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const dispatch = useDispatch();
@@ -80,7 +80,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-dark-panel border-r border-dark-border flex flex-col h-full hidden md:flex">
+    <div className={`fixed inset-y-0 left-0 z-30 w-64 bg-dark-panel border-r border-dark-border flex flex-col h-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       <div className="p-4 border-b border-dark-border">
         <button
           onClick={handleNewChat}
@@ -99,9 +99,12 @@ const Sidebar = () => {
             <p className="px-2 text-sm text-gray-500 italic">{t('noChats')}</p>
           ) : (
              chatSessions.map((session) => (
-              <button 
+               <button 
                 key={session.id}
-                onClick={() => loadChat(session.id)}
+                onClick={() => {
+                  loadChat(session.id);
+                  onClose?.(); // Close mobile sidebar on selection
+                }}
                 className={`flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg transition-colors group relative ${
                   activeChatId === session.id 
                     ? 'bg-primary-500/10 text-primary-400 font-medium' 
