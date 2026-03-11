@@ -35,15 +35,19 @@ const ChatInput = () => {
       // Create new chat if none is active
       if (!currentChatId) {
         const newChat = await createNewChat();
-        if (newChat) {
-          currentChatId = newChat.id;
-          dispatch(setActiveChat(newChat));
-          // Refresh sessions list
-          const sessions = await getAllChats();
-          dispatch(setChatSessions(sessions));
-        } else {
-           throw new Error("Cannot create a session.");
+        if (!newChat || !newChat.id) {
+          throw new Error("Server bilan ulanishda xato. Iltimos, qayta urinib ko'ring.");
         }
+        currentChatId = newChat.id;
+        dispatch(setActiveChat(newChat));
+        // Refresh sessions list
+        const sessions = await getAllChats();
+        dispatch(setChatSessions(sessions));
+      }
+
+      // Strict guard — never call API with invalid chatId
+      if (!currentChatId || typeof currentChatId !== 'string') {
+        throw new Error("Chat ID topilmadi.");
       }
 
       // Optimistically add user message to DOM

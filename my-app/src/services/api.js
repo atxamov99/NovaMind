@@ -60,17 +60,15 @@ export const getChatHistory = async (chatId) => {
 };
 
 export const createNewChat = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/chats`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to create new chat');
-    return await response.json();
-  } catch (error) {
-    console.error("Error creating chat:", error);
-    return null;
+  const response = await fetch(`${API_BASE_URL}/chats`, {
+    method: 'POST',
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to create new chat');
   }
+  return await response.json();
 };
 
 export const deleteChat = async (chatId) => {
