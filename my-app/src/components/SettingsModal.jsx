@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { X, User, Shield, Bell, Moon, Sun, Monitor, Check, Eye, EyeOff, ChevronRight } from 'lucide-react';
@@ -51,25 +52,29 @@ const SettingsModal = ({ isOpen, onClose }) => {
     { id: 'ru', label: 'Русский', flag: '🇷🇺' },
   ];
 
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
-        />
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+          />
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl bg-white dark:bg-dark-panel rounded-2xl shadow-2xl border border-gray-100 dark:border-dark-border overflow-hidden flex flex-col max-h-[92vh]"
-        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full h-full sm:h-auto sm:max-h-[92vh] max-w-2xl bg-white dark:bg-dark-panel rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl border-0 sm:border sm:border-gray-100 sm:dark:border-dark-border overflow-hidden flex flex-col"
+          >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-dark-border shrink-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settingsTitle')}</h2>
@@ -308,7 +313,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 };
 
