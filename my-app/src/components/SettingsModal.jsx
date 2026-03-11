@@ -55,7 +55,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -105,7 +105,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-6 overflow-y-auto min-h-0">
+            <div className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden min-h-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -121,13 +121,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
                       {/* Profile */}
                       <section>
                         <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">{t('profileInfo')}</h3>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold uppercase shadow-lg shadow-primary-500/20 shrink-0">
                             {user?.name?.charAt(0) || 'U'}
                           </div>
-                          <div>
-                            <p className="text-base font-semibold text-gray-900 dark:text-white">{user?.name || t('defaultUser')}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email || 'email@example.com'}</p>
+                          <div className="min-w-0">
+                            <p className="text-base font-semibold text-gray-900 dark:text-white truncate">{user?.name || t('defaultUser')}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email || 'email@example.com'}</p>
                           </div>
                         </div>
                       </section>
@@ -244,12 +244,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
                       <section>
                         <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">{t('twoFactor')}</h3>
-                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-bg rounded-xl border border-gray-200 dark:border-dark-border">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">{t('twoFactor')}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('twoFactorDesc')}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-dark-bg rounded-xl border border-gray-200 dark:border-dark-border">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{t('twoFactor')}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 sm:line-clamp-none">{t('twoFactorDesc')}</p>
                           </div>
-                          <button className="flex items-center gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-xl transition-colors">
+                          <button className="flex items-center justify-center w-full sm:w-auto gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-xl transition-colors shrink-0">
                             {t('enable')} <ChevronRight size={14} />
                           </button>
                         </div>
@@ -259,12 +259,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
                       <section>
                         <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">{t('sessions')}</h3>
-                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-bg rounded-xl border border-gray-200 dark:border-dark-border">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">{t('sessions')}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('sessionsDesc')}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-dark-bg rounded-xl border border-gray-200 dark:border-dark-border">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{t('sessions')}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 sm:line-clamp-none">{t('sessionsDesc')}</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                          <button className="px-4 py-2 w-full sm:w-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors shrink-0 flex items-center justify-center text-center">
                             {t('terminateAll')}
                           </button>
                         </div>
@@ -282,14 +282,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
                           { key: 'updates', label: t('notifUpdates'), desc: t('notifUpdatesDesc') },
                           { key: 'security', label: t('notifSecurity'), desc: t('notifSecurityDesc') },
                         ].map(item => (
-                          <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-bg rounded-xl border border-gray-200 dark:border-dark-border">
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">{item.label}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.desc}</p>
+                          <div key={item.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-dark-bg rounded-xl border border-gray-200 dark:border-dark-border">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.label}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 sm:line-clamp-none">{item.desc}</p>
                             </div>
                             <button
                               onClick={() => dispatch(setNotification({ key: item.key, value: !notifications[item.key] }))}
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 self-start sm:self-auto
                                 ${notifications[item.key] ? 'bg-primary-500' : 'bg-gray-300 dark:bg-dark-border'}`}
                             >
                               <span
