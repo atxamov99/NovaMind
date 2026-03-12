@@ -78,5 +78,21 @@
       }
     ],
     "updatedAt": 1773215192800
+  },
+  {
+    "id": "1773323786866",
+    "userId": "1773168299314",
+    "title": "React-da state qanday ishlaydi...",
+    "messages": [
+      {
+        "role": "user",
+        "text": "React-da state qanday ishlaydi?"
+      },
+      {
+        "role": "model",
+        "text": "React-da \"state\" (holat) bu komponentning o'zgaruvchan ma'lumotlarini saqlash va boshqarish uchun ishlatiladigan ob'ekt. Bu ma'lumotlar o'zgarganda, React komponentni avtomatik ravishda qayta render qiladi (yangilaydi), bu esa dinamik va interaktiv foydalanuvchi interfeysini yaratish imkonini beradi. Uni komponentning \"ichki xotirasi\" yoki \"shaxsiy ma'lumotlari\" deb tasavvur qilish mumkin.\n\n**State qanday ishlaydi?**\n\nReact-da state bilan ishlashning ikki asosiy usuli bor:\n\n1.  **Class Components (Sinf Komponentlari) - `this.state` va `this.setState()`**\n    Bu an'anaviy usul bo'lib, hozirda kamroq qo'"
+      }
+    ],
+    "updatedAt": 1773323786924
   }
 ]
