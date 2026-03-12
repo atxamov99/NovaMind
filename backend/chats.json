@@ -94,5 +94,21 @@
       }
     ],
     "updatedAt": 1773323786924
+  },
+  {
+    "id": "1773325509115",
+    "userId": "1773168299314",
+    "title": "React-da state qanday ishlaydi...",
+    "messages": [
+      {
+        "role": "user",
+        "text": "React-da state qanday ishlaydi?"
+      },
+      {
+        "role": "model",
+        "text": "Reactda \"state\" – bu komponent tomonidan boshqariladigan va vaqt o'tishi bilan o'zgarishi mumkin bo'lgan ma'lumotlar to'plami. U komponentning tashqi ko'rinishi va xatti-harakatini belgilaydi. State o'zgarganda, React komponentni qayta render qiladi (ya'ni, uni ekranda yangilaydi), bu esa foydalanuvchi interfeysini dinamik va interaktiv qiladi.\n\n### Nima uchun state muhim?\n\nReact ilovalarini dinamik va interaktiv qilish uchun state juda muhim. U foydalanuvchi harakatlariga (masalan, tugmani bosish, shaklga ma'lumot kiritish) yoki tashqi ma'lumotlarning o'zgarishiga (masalan, serverdan kelgan yangi ma'lumotlar) javob berishga imkon beradi.\n\n**Misollar:**\n*   Hisoblagich (counter) qiymati.\n*   Shakl kiritish maydonchasidagi (form input) joriy matn.\n*   Tugmani yoqish/o'chirish (toggle) holati.\n*   Ro'yxatdagi elementlar.\n\n### Reactda state qanday ishlaydi (Hooks yordamida)?\n\nZamonaviy Reactda (Hooksdan foydalangan holda) funksional komponentlarda state'ni"
+      }
+    ],
+    "updatedAt": 1773325509182
   }
 ]

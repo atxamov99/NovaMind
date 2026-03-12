@@ -272,7 +272,7 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
     const status = error?.status;
     if (code === 'invalid_api_key' || status === 401) {
       return res.status(500).json({
-        error: 'Incorrect OpenAI API key. Set a valid OPENAI_API_KEY/API_KEY or configure GEMINI_API_KEY as a fallback.',
+        error: 'Incorrect API key. If using Gemini, set a valid GEMINI_API_KEY. If using OpenAI, set a valid OPENAI_API_KEY.',
       });
     }
     if (status === 403) {
