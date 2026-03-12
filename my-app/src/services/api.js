@@ -95,12 +95,13 @@ export const generateChatResponse = async (chatId, newMessage) => {
     });
 
     if (!response.ok) {
-        throw new Error("Failed to get response from AI server.");
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to get response from AI server.");
     }
     
     return await response.json();
   } catch (error) {
     console.error("Error generating response from backend:", error);
-    throw new Error("Failed to get response from AI. Please try again.");
+    throw new Error(error?.message || "Failed to get response from AI. Please try again.");
   }
 };

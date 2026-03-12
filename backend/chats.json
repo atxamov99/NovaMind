@@ -32,27 +32,51 @@
     "updatedAt": 1773167941710
   },
   {
-    "id": "1773168327657",
-    "userId": "1773168299314",
+    "id": "1773214876076",
+    "userId": "1773214875914",
     "title": "salom",
     "messages": [
       {
         "role": "user",
         "text": "salom"
-      },
-      {
-        "role": "model",
-        "text": "Salom! Qalaysiz?"
-      },
-      {
-        "role": "user",
-        "text": "qandaysan"
-      },
-      {
-        "role": "model",
-        "text": "Yaxshiman, rahmat! O'zingiz qalaysiz?"
       }
     ],
-    "updatedAt": 1773168335925
+    "updatedAt": 1773214876094
+  },
+  {
+    "id": "1773215036943",
+    "userId": "1773215036734",
+    "title": "salom",
+    "messages": [
+      {
+        "role": "user",
+        "text": "salom"
+      }
+    ],
+    "updatedAt": 1773215036959
+  },
+  {
+    "id": "1773215145308",
+    "userId": "1773215145062",
+    "title": "salom",
+    "messages": [
+      {
+        "role": "user",
+        "text": "salom"
+      }
+    ],
+    "updatedAt": 1773215145319
+  },
+  {
+    "id": "1773215192790",
+    "userId": "1773215192635",
+    "title": "salom, o'zingni tanishtir",
+    "messages": [
+      {
+        "role": "user",
+        "text": "salom, o'zingni tanishtir"
+      }
+    ],
+    "updatedAt": 1773215192800
   }
 ]

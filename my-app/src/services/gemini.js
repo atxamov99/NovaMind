@@ -1,16 +1,16 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// API KEY from user request
-const API_KEY = "AIzaSyDOkH58Hh9cJ6LQZTOaCs8c0dXncgxHPLo";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Initialize the Gemini API client
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 
 // We use gemini-2.5-flash since the provided API key supports it
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+const model = genAI ? genAI.getGenerativeModel({ model: "gemini-2.5-flash" }) : null;
 
 export const generateChatResponse = async (history, newMessage) => {
   try {
+    if (!model) throw new Error("Missing VITE_GEMINI_API_KEY");
     // Format history for Gemini API
     const formattedHistory = history.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model',

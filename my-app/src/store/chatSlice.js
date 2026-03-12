@@ -49,15 +49,13 @@ export const chatSlice = createSlice({
   },
 });
 
-export const { 
-  addMessage, 
-  setLoading, 
-  setError, 
-  clearMessages,
-  setChatSessions,
-  setActiveChat,
-  updateChatTitle,
-  removeChatSession
-} = chatSlice.actions;
+export const addMessage = chatSlice.actions.addMessage;
+export const setLoading = chatSlice.actions.setLoading;
+export const setError = chatSlice.actions.setError;
+export const clearMessages = chatSlice.actions.clearMessages;
+export const setChatSessions = chatSlice.actions.setChatSessions;
+export const setActiveChat = chatSlice.actions.setActiveChat;
+export const updateChatTitle = chatSlice.actions.updateChatTitle;
+export const removeChatSession = chatSlice.actions.removeChatSession;
 
 export default chatSlice.reducer;

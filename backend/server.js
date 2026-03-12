@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -19,8 +20,23 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Load API Key
-const openai = new OpenAI({ apiKey: process.env.API_KEY });
+// Serve built frontend (Render / single-service deploy)
+const frontendDistPath = path.join(__dirname, '..', 'my-app', 'dist');
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+}
+
+// Load API Key (support common env var names)
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.API_KEY;
+const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const gemini =
+  GEMINI_API_KEY
+    ? new GoogleGenerativeAI(GEMINI_API_KEY).getGenerativeModel({
+        model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+      })
+    : null;
 
 // Database paths - process.env.VERCEL is set automatically by Vercel
 const isVercel = process.env.VERCEL === '1';
@@ -152,6 +168,12 @@ app.delete('/api/chats/:id', authenticateToken, (req, res) => {
 // POST /api/chats/:id/messages (Send message to chat)
 app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
   try {
+    if (!openai && !gemini) {
+      return res.status(500).json({
+        error: 'AI provider is not configured. Set OPENAI_API_KEY (or API_KEY) or GEMINI_API_KEY on the server.',
+      });
+    }
+
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: 'Message is required' });
 
@@ -180,15 +202,61 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
       content: msg.text,
     }));
 
-    // Get response from OpenAI
-    const completion = await openai.chat.completions.create({
-      model: process.env.MODEL || 'gpt-4o-mini',
-      messages: formattedMessages,
-      max_tokens: 2048,
-      temperature: 0.7,
-    });
+    let responseText;
+    const preferredProvider = (process.env.AI_PROVIDER || '').toLowerCase(); // 'openai' | 'gemini'
 
-    const responseText = completion.choices[0].message.content;
+    const tryOpenAI = async () => {
+      if (!openai) return null;
+      const completion = await openai.chat.completions.create({
+        model: process.env.MODEL || 'gpt-4o-mini',
+        messages: formattedMessages,
+        max_tokens: 2048,
+        temperature: 0.7,
+      });
+      return completion.choices[0].message.content;
+    };
+
+    const tryGemini = async () => {
+      if (!gemini) return null;
+      const history = chat.messages.slice(0, -1).map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }],
+      }));
+      const geminiChat = gemini.startChat({
+        history,
+        generationConfig: {
+          maxOutputTokens: 2048,
+          temperature: 0.7,
+        },
+      });
+      const result = await geminiChat.sendMessage(message);
+      const response = await result.response;
+      return response.text();
+    };
+
+    try {
+      if (preferredProvider === 'gemini') {
+        responseText = await tryGemini();
+        if (!responseText) responseText = await tryOpenAI();
+      } else {
+        responseText = await tryOpenAI();
+        if (!responseText) responseText = await tryGemini();
+      }
+    } catch (err) {
+      // If OpenAI key is invalid, fall back to Gemini if available
+      const openaiCode = err?.code || err?.error?.code;
+      if ((openaiCode === 'invalid_api_key' || err?.status === 401) && gemini) {
+        responseText = await tryGemini();
+      } else {
+        throw err;
+      }
+    }
+
+    if (!responseText) {
+      return res.status(500).json({
+        error: 'Failed to generate AI response. Check OPENAI_API_KEY/API_KEY or GEMINI_API_KEY.',
+      });
+    }
 
     // Add AI response to DB
     const modelMsg = { role: 'model', text: responseText };
@@ -200,6 +268,18 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error("Error generating response:", error);
+    const code = error?.code || error?.error?.code;
+    const status = error?.status;
+    if (code === 'invalid_api_key' || status === 401) {
+      return res.status(500).json({
+        error: 'Incorrect OpenAI API key. Set a valid OPENAI_API_KEY/API_KEY or configure GEMINI_API_KEY as a fallback.',
+      });
+    }
+    if (status === 403) {
+      return res.status(500).json({
+        error: 'AI provider rejected the request (403). If using Gemini, your API key may be blocked/leaked—generate a new key and set GEMINI_API_KEY. If using OpenAI, check project/org permissions and key status.',
+      });
+    }
     res.status(500).json({ error: 'Failed to get response from AI.' });
   }
 });
@@ -207,6 +287,14 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
 });
+
+// SPA fallback (must be after /api routes)
+if (fs.existsSync(frontendDistPath)) {
+  // Express 5: use a RegExp instead of '*' wildcard
+  app.get(/^(?!\/api\/).*/, (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
 
 // Export app for Vercel serverless deployment
 module.exports = app;

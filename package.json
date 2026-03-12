@@ -1,5 +1,14 @@
 {
-  "dependencies": {
-    "dotenv": "^17.3.1"
+  "name": "novamind",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "my-app"
+  ],
+  "scripts": {
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:frontend": "npm --workspace my-app run dev",
+    "build": "npm --workspace my-app run build",
+    "start": "npm --workspace backend run start"
   }
 }

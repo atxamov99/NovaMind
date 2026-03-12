@@ -10,8 +10,8 @@ import MessageBubble from './components/MessageBubble';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { motion, AnimatePresence } from 'framer-motion';
-import { addMessage, setLoading, setError } from './store/chatSlice';
-import { generateChatResponse } from './services/api';
+import { addMessage, setLoading, setError, setActiveChat, updateChatTitle, setChatSessions } from './store/chatSlice';
+import { generateChatResponse, createNewChat, getAllChats } from './services/api';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
 
 const ChatInterface = () => {
   const { t } = useTranslation();
-  const { messages, isLoading, error } = useSelector(state => state.chat);
+  const { messages, isLoading, error, activeChatId } = useSelector(state => state.chat);
   const { user } = useSelector(state => state.auth);
   const dispatch = useDispatch();
   const messagesEndRef = useRef(null);
@@ -38,13 +38,32 @@ const ChatInterface = () => {
 
   const handleSuggestionClick = async (suggestion) => {
     if (isLoading) return;
-    dispatch(addMessage({ role: 'user', text: suggestion }));
     dispatch(setLoading(true));
     dispatch(setError(null));
 
     try {
-      const data = await generateChatResponse(suggestion);
+      let currentChatId = activeChatId;
+
+      // Create new chat if none is active
+      if (!currentChatId) {
+        const newChat = await createNewChat();
+        if (!newChat || !newChat.id) {
+          throw new Error("Server bilan ulanishda xato. Iltimos, qayta urinib ko'ring.");
+        }
+        currentChatId = newChat.id;
+        dispatch(setActiveChat(newChat));
+        const sessions = await getAllChats();
+        dispatch(setChatSessions(sessions));
+      }
+
+      // Optimistically add user message
+      dispatch(addMessage({ role: 'user', text: suggestion }));
+
+      const data = await generateChatResponse(currentChatId, suggestion);
       dispatch(addMessage(data.modelMessage));
+      if (data.title) {
+        dispatch(updateChatTitle({ id: currentChatId, title: data.title }));
+      }
     } catch (err) {
       dispatch(setError(err.message));
     } finally {
