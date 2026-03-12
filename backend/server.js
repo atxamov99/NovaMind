@@ -30,7 +30,9 @@ if (fs.existsSync(frontendDistPath)) {
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.API_KEY;
 const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// Hardcoding the API key as a fallback so Render works without dashboard configuration
+const FALLBACK_GEMINI_KEY = 'AIzaSyA837Thyn-SAjFl43u9QItUZErIYWOAuoc';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || FALLBACK_GEMINI_KEY;
 const gemini =
   GEMINI_API_KEY
     ? new GoogleGenerativeAI(GEMINI_API_KEY).getGenerativeModel({
