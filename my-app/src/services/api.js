@@ -35,6 +35,19 @@ export const loginUser = async (email, password) => {
   return await response.json();
 };
 
+export const updateProfile = async (name, email) => {
+  const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify({ name, email }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to update profile');
+  }
+  return await response.json();
+};
+
 /* --- CHATS --- */
 export const getAllChats = async () => {
   try {
@@ -86,16 +99,28 @@ export const deleteChat = async (chatId) => {
 
 export const generateChatResponse = async (chatId, newMessage) => {
   if (!chatId) throw new Error("No active chat session.");
+  const safeMessage = typeof newMessage === 'string' ? newMessage.trim() : '';
+  if (!safeMessage) throw new Error("Message is empty.");
   try {
     const response = await fetch(`${API_BASE_URL}/chats/${chatId}/messages`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ message: newMessage }),
+      body: JSON.stringify({ message: safeMessage }),
     });
 
     if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error || "Failed to get response from AI server.");
+      const raw = await response.text().catch(() => '');
+      let err = {};
+      try {
+        err = raw ? JSON.parse(raw) : {};
+      } catch (_) {
+        err = {};
+      }
+      const message =
+        err.error ||
+        raw ||
+        `Failed to get response from AI server (HTTP ${response.status}).`;
+      throw new Error(message);
     }
     
     return await response.json();

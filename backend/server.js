@@ -16,7 +16,8 @@ const JWT_SECRET = 'super_secret_jwt_key_123';
 // Middleware
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
 
@@ -122,6 +123,32 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
 });
 
+// PUT /api/auth/profile (Update profile)
+app.put('/api/auth/profile', authenticateToken, (req, res) => {
+  const name = (req.body?.name || '').trim();
+  const email = (req.body?.email || '').trim();
+
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Name and email are required' });
+  }
+
+  const users = readJSON(usersDBPath);
+  const userIndex = users.findIndex(u => u.id === req.user.id);
+  if (userIndex === -1) return res.status(404).json({ error: 'User not found' });
+
+  const emailExists = users.some(u => u.email === email && u.id !== req.user.id);
+  if (emailExists) {
+    return res.status(400).json({ error: 'Email already exists' });
+  }
+
+  users[userIndex].name = name;
+  users[userIndex].email = email;
+  writeJSON(usersDBPath, users);
+
+  const token = jwt.sign({ id: users[userIndex].id, name, email }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token, user: { id: users[userIndex].id, name, email } });
+});
+
 /* ================== CHAT ROUTES ================== */
 
 // GET /api/chats (Get all user's chats)
@@ -176,7 +203,8 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
       });
     }
 
-    const { message } = req.body;
+    const rawMessage = typeof req.body?.message === 'string' ? req.body.message : '';
+    const message = rawMessage.trim();
     if (!message) return res.status(400).json({ error: 'Message is required' });
 
     const allChats = readJSON(chatsDBPath);
@@ -282,7 +310,11 @@ app.post('/api/chats/:id/messages', authenticateToken, async (req, res) => {
         error: 'AI provider rejected the request (403). If using Gemini, your API key may be blocked/leaked—generate a new key and set GEMINI_API_KEY. If using OpenAI, check project/org permissions and key status.',
       });
     }
-    res.status(500).json({ error: 'Failed to get response from AI.' });
+    const providerMessage =
+      error?.response?.data?.error?.message ||
+      error?.response?.data?.message ||
+      error?.message;
+    res.status(500).json({ error: providerMessage || 'Failed to get response from AI.' });
   }
 });
 
